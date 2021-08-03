@@ -1,0 +1,20 @@
+{
+  "name": "update-googlesheet",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "twilio-run",
+    "deploy": "twilio-run deploy"
+  },
+  "devDependencies": {
+    "twilio-run": "^2.0.0"
+  },
+  "engines": {
+    "node": "10.17.0"
+  },
+  "dependencies": {
+    "async": "^3.2.0",
+    "google-spreadsheet": "^3.0.11"
+  }
+}

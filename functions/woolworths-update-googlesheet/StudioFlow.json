@@ -1,0 +1,272 @@
+{
+    "description": "SRDCTC Message (orig)",
+    "states": [
+      {
+        "name": "Trigger",
+        "type": "trigger",
+        "transitions": [
+          {
+            "event": "incomingMessage"
+          },
+          {
+            "next": "set_sheetId",
+            "event": "incomingCall"
+          },
+          {
+            "event": "incomingRequest"
+          }
+        ],
+        "properties": {
+          "offset": {
+            "x": -80,
+            "y": -350
+          }
+        }
+      },
+      {
+        "name": "Check_phone_number",
+        "type": "run-function",
+        "transitions": [
+          {
+            "next": "Number_Present",
+            "event": "success"
+          },
+          {
+            "event": "fail"
+          }
+        ],
+        "properties": {
+          "service_sid": "default",
+          "offset": {
+            "x": -50,
+            "y": 110
+          },
+          "parameters": [
+            {
+              "value": "{{trigger.call.From}}",
+              "key": "from"
+            },
+            {
+              "value": "{{flow.variables.gsheet}}",
+              "key": "gsheet"
+            }
+          ],
+          "url": "https://boysenberry-somali-9426.twil.io/lookupNumber"
+        }
+      },
+      {
+        "name": "Number_Present",
+        "type": "split-based-on",
+        "transitions": [
+          {
+            "event": "noMatch"
+          },
+          {
+            "next": "say_play_2",
+            "event": "match",
+            "conditions": [
+              {
+                "friendly_name": "number not there",
+                "arguments": [
+                  "{{widgets.Check_phone_number.body}}"
+                ],
+                "type": "contains",
+                "value": "the number is not in the spreadsheet"
+              }
+            ]
+          },
+          {
+            "next": "say_play_1",
+            "event": "match",
+            "conditions": [
+              {
+                "friendly_name": "If value contains {{trigger.call.from}}",
+                "arguments": [
+                  "{{widgets.Check_phone_number.body}}"
+                ],
+                "type": "contains",
+                "value": "{{trigger.call.From}}"
+              }
+            ]
+          }
+        ],
+        "properties": {
+          "input": "{{widgets.Check_phone_number.body}}",
+          "offset": {
+            "x": 100,
+            "y": 320
+          }
+        }
+      },
+      {
+        "name": "say_play_2",
+        "type": "say-play",
+        "transitions": [
+          {
+            "event": "audioComplete"
+          }
+        ],
+        "properties": {
+          "voice": "Polly.Russell",
+          "offset": {
+            "x": 10,
+            "y": 580
+          },
+          "loop": 1,
+          "say": "This message recording is sensitive.\nYour phone number has not been authorised to hear this message. Please contact your HR manager for more information.",
+          "language": "en-AU"
+        }
+      },
+      {
+        "name": "Update_sheet_after_message_ended",
+        "type": "run-function",
+        "transitions": [
+          {
+            "next": "Call_end_message",
+            "event": "success"
+          },
+          {
+            "event": "fail"
+          }
+        ],
+        "properties": {
+          "service_sid": "default",
+          "offset": {
+            "x": 530,
+            "y": 1180
+          },
+          "parameters": [
+            {
+              "value": "{{widgets.Check_phone_number.parsed._rowNumber}}",
+              "key": "row"
+            },
+            {
+              "value": "{{flow.variables.gsheet}}",
+              "key": "gsheet"
+            }
+          ],
+          "url": "https://boysenberry-somali-9426.twil.io/callEndedMessageUpdate"
+        }
+      },
+      {
+        "name": "Play_Message",
+        "type": "say-play",
+        "transitions": [
+          {
+            "next": "Update_sheet_after_message_ended",
+            "event": "audioComplete"
+          }
+        ],
+        "properties": {
+          "play": "{{flow.variables.message}}",
+          "offset": {
+            "x": 400,
+            "y": 960
+          },
+          "loop": 1
+        }
+      },
+      {
+        "name": "Call_end_message",
+        "type": "say-play",
+        "transitions": [
+          {
+            "event": "audioComplete"
+          }
+        ],
+        "properties": {
+          "voice": "Polly.Russell",
+          "offset": {
+            "x": 720,
+            "y": 1470
+          },
+          "loop": 1,
+          "say": "Thank you. This is the end of the message.\n\nThe call will now hang up.",
+          "language": "en-AU"
+        }
+      },
+      {
+        "name": "Update_sheet_after_message_start",
+        "type": "run-function",
+        "transitions": [
+          {
+            "next": "Play_Message",
+            "event": "success"
+          },
+          {
+            "event": "fail"
+          }
+        ],
+        "properties": {
+          "service_sid": "default",
+          "offset": {
+            "x": 840,
+            "y": 790
+          },
+          "parameters": [
+            {
+              "value": "{{widgets.Check_phone_number.parsed._rowNumber}}",
+              "key": "row"
+            },
+            {
+              "value": "{{flow.variables.gsheet}}",
+              "key": "gsheet"
+            }
+          ],
+          "url": "https://boysenberry-somali-9426.twil.io/startingMessageUpdate"
+        }
+      },
+      {
+        "name": "set_sheetId",
+        "type": "set-variables",
+        "transitions": [
+          {
+            "next": "Check_phone_number",
+            "event": "next"
+          }
+        ],
+        "properties": {
+          "variables": [
+            {
+              "index": "0",
+              "value": "https://boysenberry-somali-9426.twil.io/assets/Never%20Gonna%20Give%20You%20Up%20Original.mp3",
+              "key": "message"
+            },
+            {
+              "index": "1",
+              "value": "1kjNcWRTvs3jthHr00IMKHh3fSPFggrhl6Fyr1EO8STY",
+              "key": "gsheet"
+            }
+          ],
+          "offset": {
+            "x": -190,
+            "y": -120
+          }
+        }
+      },
+      {
+        "name": "say_play_1",
+        "type": "say-play",
+        "transitions": [
+          {
+            "next": "Update_sheet_after_message_start",
+            "event": "audioComplete"
+          }
+        ],
+        "properties": {
+          "voice": "Polly.Russell",
+          "offset": {
+            "x": 440,
+            "y": 590
+          },
+          "loop": 1,
+          "say": "Thanks we have confirmed your number is in the list, your message will begin now.",
+          "language": "en-AU"
+        }
+      }
+    ],
+    "initial_state": "Trigger",
+    "flags": {
+      "allow_concurrent_calls": true
+    }
+  }
